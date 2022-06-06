@@ -14,6 +14,7 @@ import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,12 +31,15 @@ public class ContractsServiceImpl implements ContractsService{
     @Autowired
     private DevicesRepo devicesRepo;
     public static final String FONT = "./src/main/resources/arialmt.ttf";
+    private static final Logger log = Logger.getLogger("ContractsServiceImpl.class");
     @Override
     public List<ContractsSqlDao> searchCompName(String name){
+        log.info("Поиск контракта по имени клиента");
         return contractsRepo.findByCompNameContainingIgnoreCaseOrderByCompName(name);
     }
     @Override
     public Iterable<ContractsSqlDao> addDevice(ContractsSqlDao devices){
+        log.info("Добавление контрактов");
         devices.setRelevance();
         if (devices.getTempStr()!=null) {
             String[] array = devices.getTempStr().split(",");
@@ -60,10 +64,12 @@ public class ContractsServiceImpl implements ContractsService{
     }
     @Override
     public ContractsSqlDao viewId(int id){
+        log.info("Нахождение контракта по id");
         return contractsRepo.findById(id).orElseThrow();
     }
     @Override
     public void delDev(int id){
+        log.info("Удаление контракта");
         ContractsSqlDao contracts = contractsRepo.findById(id).orElseThrow();
         if(contracts.getClient()!= null){
             ClientsSqlDao client = contracts.getClient();
@@ -117,6 +123,7 @@ public class ContractsServiceImpl implements ContractsService{
     }
     @Override
     public List<ContractsSqlDao> searchContracts(String fdate, String ldate, String name){
+        log.info("Поиск контрактов за промежуток времени");
         List<ContractsSqlDao> allContracts = contractsRepo.findByCompNameContainingIgnoreCaseOrderByCompName(name);
         Long one = Long.parseLong(fdate);
         Long two = Long.parseLong(ldate);
@@ -128,6 +135,7 @@ public class ContractsServiceImpl implements ContractsService{
     }
     @Override
     public Iterable<ContractsSqlDao> putDec(int id, ContractsSqlDao devices){
+        log.info("Изменение контрактов");
         ContractsSqlDao contract = contractsRepo.findById(id).orElseThrow();
         if(contract.getOldClient()==null) {
             contract.setCompName(devices.getCompName());
@@ -173,6 +181,7 @@ public class ContractsServiceImpl implements ContractsService{
     }
     @Override
     public Iterable<ContractsSqlDao> noContractId(int idc, int idd){
+        log.info("Удаление девайса");
         ContractsSqlDao clie = contractsRepo.findById(idc).orElseThrow();
         DevicesSqlDao dev = devicesRepo.findById(idd).orElseThrow();
         dev.delOneCntr(clie);
@@ -193,6 +202,7 @@ public class ContractsServiceImpl implements ContractsService{
     }
     @Override
     public void financePdf(List list) {
+        log.info("Формирование отчета финансов pdf формат");
         Document document = new Document();
         try {
             BaseFont bf = BaseFont.createFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
@@ -285,6 +295,7 @@ public class ContractsServiceImpl implements ContractsService{
     @Override
     public void getPDF(List list)
     {
+        log.info("pdf отчет по контрактам");
         Document document = new Document();
         try {
             BaseFont bf = BaseFont.createFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
@@ -373,6 +384,7 @@ public class ContractsServiceImpl implements ContractsService{
 
     @Override
     public List<ContractsSqlDao> getRelev(String name){
+        log.info("Отбор релевантных контрактов");
         List <ContractsSqlDao> relList, contractsList;
         contractsList = contractsRepo.findByCompNameContainingIgnoreCaseOrderByCompName(name);
         relList = contractsList.stream().filter(element-> ((element.getRelevance()))).collect(Collectors.toList());
@@ -381,6 +393,7 @@ public class ContractsServiceImpl implements ContractsService{
 
     @Override
     public List<ContractsSqlDao> getNotRelev(String name){
+        log.info("Список нерелевантных контрактов");
         List <ContractsSqlDao> relList, contractsList;
         contractsList = contractsRepo.findByCompNameContainingIgnoreCaseOrderByCompName(name);
         relList = contractsList.stream().filter(element-> ((!element.getRelevance()))).collect(Collectors.toList());

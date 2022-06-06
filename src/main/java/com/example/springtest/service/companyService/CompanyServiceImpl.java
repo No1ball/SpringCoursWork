@@ -11,6 +11,7 @@ import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,13 +24,14 @@ import java.util.stream.Collectors;
 public class CompanyServiceImpl implements CompanyService {
     @Autowired
     private ClientsRepo companyRepo;
-
+    private static final Logger log = Logger.getLogger("CompanyServiceImpl.class");
     @Autowired
     private ContractsRepo contractsRepo;
 
     public static final String FONT = "./src/main/resources/arialmt.ttf";
     @Override
     public List<ClientsSqlDao> getCompany() {
+        log.info("Список первичных контактов");
         List<ClientsSqlDao> fullList = companyRepo.findAll();
         List<ClientsSqlDao> listComp = fullList.stream().filter(element -> (element.getTotalSumm() < 0)).collect(Collectors.toList());
         return listComp;
@@ -37,11 +39,13 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public void delCompany(int id) {
+        log.info("Удаление первичного контакта");
         companyRepo.deleteById(id);
     }
 
     @Override
     public ClientsSqlDao putCompany(int id, ClientsSqlDao company) {
+        log.info("Изменение первичного контакта");
         ClientsSqlDao comp = companyRepo.findById(id).orElseThrow();
         comp.setName(company.getName());
         comp.setContact(company.getContact());
@@ -50,17 +54,20 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public ClientsSqlDao addCompany(ClientsSqlDao company) {
+        log.info("Добавление первичного контакта");
         return companyRepo.save(company);
     }
 
     @Override
     public Iterable<ClientsSqlDao> toClient(int id, ClientsSqlDao client) {
+        log.info("Перевод первичного контакта в статус клиента");
         ClientsSqlDao clien = companyRepo.findById(id).orElseThrow();
         ContractsSqlDao contract;
         try {
             contract = contractsRepo.findById(client.getNum()).orElseThrow();
             contract.setClient(client);
             contract.setCompName(clien.getName());
+
         } catch (Exception ex) {
             contract = new ContractsSqlDao();
             contract.setId(client.getNum());
@@ -69,6 +76,7 @@ public class CompanyServiceImpl implements CompanyService {
             contract.setFDate(new Date());
             contract.setPrice();
             contractsRepo.save(contract);
+            log.info("Список клиентов");
         }
         clien.setContractId(contract);
         if (clien.getContractId() == null) {
@@ -83,12 +91,14 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public List<ClientsSqlDao> searchCompany(String name) {
+        log.info("Поиск первичного контакта по имени");
         List<ClientsSqlDao> fullList = companyRepo.findByNameContainsIgnoreCaseOrderByName(name);
         return fullList.stream().filter(element -> (element.getTotalSumm() < 0)).collect(Collectors.toList());
     }
 
     @Override
     public void toPdf(List list) {
+        log.info("Генерация pdf отчета - первичные контакты");
         Document document = new Document();
         try {
             BaseFont bf = BaseFont.createFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);

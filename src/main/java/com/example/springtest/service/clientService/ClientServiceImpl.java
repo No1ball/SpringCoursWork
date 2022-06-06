@@ -13,6 +13,7 @@ import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,17 +27,20 @@ import java.util.stream.Collectors;
 public class ClientServiceImpl implements ClientService{
     @Autowired
     private ClientsRepo clientsRepo;
+    private static final Logger log = Logger.getLogger("ClientServiceImpl.class");
     @Autowired
     private ContractsRepo contractsRepo;
     public static final String FONT = "./src/main/resources/arialmt.ttf";
     @Override
     public List<ClientsSqlDao> getCompany(){
+        log.info("Список клиентов");
         List<ClientsSqlDao> fullList = clientsRepo.findAll();
         List<ClientsSqlDao> listComp = fullList.stream().filter(element->(element.getTotalSumm()>=0)).collect(Collectors.toList());
         return listComp;
     }
     @Override
     public void delCompany(int id){
+        log.info("Удаление клиента");
         ClientsSqlDao client = clientsRepo.findById(id).orElseThrow();
         ContractsSqlDao clientContr = client.getContractId();
         if(clientContr != null) {
@@ -61,6 +65,7 @@ public class ClientServiceImpl implements ClientService{
     }
     @Override
     public ClientsSqlDao putCompany(int id, ClientsSqlDao company){
+        log.info("Изменения клиента");
         ClientsSqlDao comp = clientsRepo.findById(id).orElseThrow();
         ContractsSqlDao contract;
         comp.setName(company.getName());
@@ -86,6 +91,7 @@ public class ClientServiceImpl implements ClientService{
     }
     @Override
     public Iterable<ClientsSqlDao> toOld(int id){
+        log.info("Перевод");
         ClientsSqlDao company = clientsRepo.findById(id).orElseThrow();
         company.addOldContract(company.getContractId());
         ContractsSqlDao cont = contractsRepo.findById(company.getContractId().getId()).orElseThrow();
@@ -99,6 +105,7 @@ public class ClientServiceImpl implements ClientService{
 
     @Override
     public Iterable<ClientsSqlDao> noContractId(int id){
+        log.info("Отвязывание клиента от контракта");
         ClientsSqlDao clie = clientsRepo.findById(id).orElseThrow();
         ContractsSqlDao contr = clie.getContractId();
         clie.setTotalSumm(clie.getTotalSumm()-contr.getPrice());
@@ -111,6 +118,7 @@ public class ClientServiceImpl implements ClientService{
 
     @Override
     public Iterable<ClientsSqlDao> addCompany(ClientsSqlDao company){
+        log.info("Добавление компании");
         ContractsSqlDao contract = new ContractsSqlDao();
         if(company.getNum() != 0){
             try{
@@ -137,17 +145,20 @@ public class ClientServiceImpl implements ClientService{
 
     @Override
     public List<ClientsSqlDao> topClient(String name){
+        log.info("Топ клиентов");
         List<ClientsSqlDao> client = clientsRepo.findByNameContainsIgnoreCaseOrderByName(name);
         List<ClientsSqlDao> listComp = client.stream().filter(element->(element.getTotalSumm()>=0)).collect(Collectors.toList());
         return listComp.stream().sorted(Comparator.comparingInt(ClientsSqlDao::getTotalSumm).reversed()).collect(Collectors.toList());
     }
     @Override
     public List<ClientsSqlDao> searchCompany(String name){
+        log.info("Поиск клиентов по имени");
         List<ClientsSqlDao> client = clientsRepo.findByNameContainsIgnoreCaseOrderByName(name);
         return client.stream().filter(element->(element.getTotalSumm()>=0)).collect(Collectors.toList());
     }
     @Override
     public void toPdf(List list, int status){
+        log.info("Генерация pdf Отчета");
         Document document = new Document();
         try {
             BaseFont bf = BaseFont.createFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
@@ -230,4 +241,5 @@ public class ClientServiceImpl implements ClientService{
             e.printStackTrace();
         }
     }
+
 }

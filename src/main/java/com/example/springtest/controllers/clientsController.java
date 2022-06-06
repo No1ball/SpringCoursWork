@@ -2,6 +2,7 @@ package com.example.springtest.controllers;
 import com.example.springtest.entity.ClientsSqlDao;
 import com.example.springtest.repos.ClientsRepo;
 import com.example.springtest.service.clientService.ClientService;
+import org.apache.log4j.BasicConfigurator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -15,7 +16,6 @@ import java.util.List;
 public class clientsController {
     @Autowired
     private ClientService clientsService;
-
     @PostMapping ("/add_clients")
     public ResponseEntity saveClient(@RequestBody ClientsSqlDao client){
         return ResponseEntity.ok(clientsService.addCompany(client));

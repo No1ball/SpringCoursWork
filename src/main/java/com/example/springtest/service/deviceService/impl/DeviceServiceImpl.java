@@ -13,6 +13,7 @@ import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,12 +29,15 @@ public class DeviceServiceImpl implements DeviceService{
     @Autowired
     private ContractsRepo contractsRepo;
     public static final String FONT = "./src/main/resources/arialmt.ttf";
+    private static final Logger log = Logger.getLogger("DeviceServiceImpl.class");
     @Override
     public List<DevicesSqlDao> search(String name){
+        log.info("Поиск девайсов по названию");
         return devicesRepo.findByNameContainingIgnoreCaseOrderByName(name);
     }
     @Override
     public Iterable<DevicesSqlDao> addDevice(DevicesSqlDao devices){
+        log.info("Добавление девайса");
         devices.setTotalSumm();
         if (devices.getTempStr()!=null) {
             String[] array = devices.getTempStr().split(",");
@@ -58,6 +62,7 @@ public class DeviceServiceImpl implements DeviceService{
     }
     @Override
     public Iterable<DevicesSqlDao> noContractId(int id){
+        log.info("Список нерелевантных контрактов");
         DevicesSqlDao clie = devicesRepo.findById(id).orElseThrow();
         List<ContractsSqlDao> contr = clie.getContract();
 
@@ -65,6 +70,7 @@ public class DeviceServiceImpl implements DeviceService{
     }
     @Override
     public Iterable<DevicesSqlDao> deleteOnlyCntrc(int idd, int idc){
+        log.info("Отвязывание девайса");
         DevicesSqlDao dev = devicesRepo.findById(idd).orElseThrow();
         ContractsSqlDao clie = contractsRepo.findById(idc).orElseThrow();
         clie.delOneEquip(dev);
@@ -81,10 +87,12 @@ public class DeviceServiceImpl implements DeviceService{
     }
     @Override
     public DevicesSqlDao viewId(int id){
+        log.info("Поиск девайса по id");
         return devicesRepo.findById(id).orElseThrow();
     }
     @Override
     public void delDev(int id){
+        log.info("Удаление девайса");
         DevicesSqlDao contracts = devicesRepo.findById(id).orElseThrow();
         if(contracts.getContract()!=null){
             List<ContractsSqlDao> client = contracts.getContract();
@@ -107,6 +115,7 @@ public class DeviceServiceImpl implements DeviceService{
     }
     @Override
     public Iterable<DevicesSqlDao> putDec(int id, DevicesSqlDao devices){
+        log.info("Изменение девайса");
         DevicesSqlDao device = devicesRepo.findById(id).orElseThrow();
         device.setName(devices.getName());
         device.setPrice(devices.getPrice());
@@ -148,11 +157,13 @@ public class DeviceServiceImpl implements DeviceService{
     }
     @Override
     public List<DevicesSqlDao> getDevices(){
+        log.info("Показать список девайсов");
         return devicesRepo.findAll();
     }
 
     @Override
     public List<DevicesSqlDao> sortByPrice(String name){
+        log.info("Сортировка девайсов по цене");
         List<DevicesSqlDao> deviceList;
         if(name.equals("")){
             deviceList = devicesRepo.findAll();
@@ -163,6 +174,7 @@ public class DeviceServiceImpl implements DeviceService{
     }
     @Override
     public List<DevicesSqlDao> sortByCount(String name){
+        log.info("Сортировка девайсов по количетсву");
         List<DevicesSqlDao> deviceList;
         if(name.equals("")){
             deviceList = devicesRepo.findAll();
@@ -173,6 +185,7 @@ public class DeviceServiceImpl implements DeviceService{
     }
     @Override
     public void getPDF(int value, String name){
+        log.info("Формирование pdf отчета по девайсам");
         Document document = new Document();
         try{
             BaseFont bf=BaseFont.createFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
