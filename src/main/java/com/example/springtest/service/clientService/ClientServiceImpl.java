@@ -70,7 +70,7 @@ public class ClientServiceImpl implements ClientService{
         ContractsSqlDao contract;
         comp.setName(company.getName());
         comp.setContact(company.getContact());
-        if(company.getNum()!= 0 && comp.getContractId().getId() !=company.getNum()){
+        if(company.getNum()!= 0){
             if(comp.getNum() != 0){
                 contract = contractsRepo.findById(comp.getNum()).orElseThrow();
                 contract.setClient(null);

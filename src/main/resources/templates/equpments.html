@@ -30,6 +30,9 @@
                 method: 'GET',
             }).then(resp=>{
                 $scope.devices = resp.data;
+                for(let i = 0; i < $scope.devices.length; i++){
+                    $scope.devices[i].tempStr = $scope.devices[i].tempStr.replace(/\s/g, '');
+                }
                 console.log(resp.data);
                 console.log(resp.data.equipments);
             });
@@ -166,8 +169,8 @@
                 $scope.eddevice.contract = null;
             });
         }
-        $scope.delNowCntr = function(qid){
-            if(confirm('Вы точно хотите удалить контракт?')) {
+        $scope.delNowCntr = function(qid) {
+            if (confirm('Вы точно хотите удалить контракт?')) {
                 $http
                 ({
                     url: "/equpments/edir/" + $scope.eddevid,

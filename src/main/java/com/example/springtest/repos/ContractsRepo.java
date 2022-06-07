@@ -9,7 +9,6 @@ import java.util.List;
 @Repository
 public interface ContractsRepo extends CrudRepository<ContractsSqlDao, Integer> {
     List<ContractsSqlDao> findByCompNameContainingIgnoreCaseOrderByCompName(String name);
-
     List <ContractsSqlDao> findAll();
 
 }
